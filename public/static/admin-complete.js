@@ -634,3 +634,333 @@ if (typeof window !== 'undefined') {
   window.activateUser = activateUser
   window.getStatusBadgeClass = getStatusBadgeClass
 }
+
+// ==========================================
+// PAGE 3: TRANSACTIONS WITH VAT & PERFECT UI
+// ==========================================
+
+async function renderAdminTransactions() {
+  if (!APP_STATE.user || APP_STATE.user.user_type !== 'admin') {
+    return `<div class="text-center py-16">Access Denied</div>`
+  }
+  
+  const result = await api('/api/admin/orders')
+  const orders = result.success ? result.data : []
+  
+  const content = `
+    <div>
+      <!-- Header -->
+      <div class="mb-8 flex items-center justify-between">
+        <div>
+          <h1 class="text-4xl font-bold text-gray-800 mb-2">${t('transactions') || 'Transactions'}</h1>
+          <p class="text-gray-600">${orders.length} total orders</p>
+        </div>
+        <select id="statusFilter" class="px-6 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-colors" onchange="filterTransactions()">
+          <option value="">${t('allStatuses') || 'All Statuses'}</option>
+          <option value="pending">${t('pending') || 'Pending'}</option>
+          <option value="confirmed">${t('confirmed') || 'Confirmed'}</option>
+          <option value="processing">${t('processing') || 'Processing'}</option>
+          <option value="delivered">${t('delivered') || 'Delivered'}</option>
+          <option value="cancelled">${t('cancelled') || 'Cancelled'}</option>
+        </select>
+      </div>
+
+      <!-- Orders Table -->
+      <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full" id="transactionsTable">
+            <thead class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
+              <tr>
+                <th class="px-6 py-5 text-left text-sm font-bold uppercase tracking-wider">Order ID</th>
+                <th class="px-6 py-5 text-left text-sm font-bold uppercase tracking-wider">Customer</th>
+                <th class="px-6 py-5 text-left text-sm font-bold uppercase tracking-wider">Type</th>
+                <th class="px-6 py-5 text-left text-sm font-bold uppercase tracking-wider">Date</th>
+                <th class="px-6 py-5 text-left text-sm font-bold uppercase tracking-wider">Amount</th>
+                <th class="px-6 py-5 text-left text-sm font-bold uppercase tracking-wider">Status</th>
+                <th class="px-6 py-5 text-center text-sm font-bold uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100" id="transactionsTableBody">
+              ${orders.map(order => `
+                <tr class="hover:bg-blue-50 transition-colors transaction-row" data-status="${order.status}">
+                  <td class="px-6 py-4">
+                    <span class="font-mono font-bold text-blue-600">${order.order_number}</span>
+                  </td>
+                  <td class="px-6 py-4">
+                    <div class="flex items-center gap-3">
+                      <div class="w-10 h-10 rounded-full bg-gradient-to-r from-green-500 to-teal-500 flex items-center justify-center text-white font-bold">
+                        ${(order.full_name || order.email).charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <p class="font-semibold text-gray-900">${order.full_name || order.email}</p>
+                        ${order.company_name ? `<p class="text-xs text-gray-500">${order.company_name}</p>` : ''}
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4">
+                    <span class="px-4 py-2 rounded-full text-xs font-bold ${
+                      order.user_type === 'company' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'
+                    }">
+                      <i class="fas ${order.user_type === 'company' ? 'fa-building' : 'fa-user'} mr-1"></i>
+                      ${order.user_type || 'individual'}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 text-gray-700">
+                    ${new Date(order.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                  </td>
+                  <td class="px-6 py-4">
+                    <span class="font-bold text-green-600 text-lg">${order.total_amount.toFixed(0)} ${t('egp') || 'EGP'}</span>
+                  </td>
+                  <td class="px-6 py-4">
+                    <span class="px-4 py-2 rounded-full text-xs font-bold ${getStatusBadgeClass(order.status)}">
+                      <i class="fas fa-circle mr-1 text-xs"></i>
+                      ${order.status}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 text-center">
+                    <button 
+                      onclick="viewTransactionDetail(${order.id})" 
+                      class="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-2 rounded-xl hover:shadow-lg transition-all transform hover:scale-105 font-semibold"
+                    >
+                      <i class="fas fa-eye mr-2"></i>View
+                    </button>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `
+  
+  return renderAdminLayout(content, 'transactions')
+}
+
+// Transaction Detail Modal with VAT
+async function viewTransactionDetail(orderId) {
+  const orderResult = await api(`/api/admin/orders/${orderId}`)
+  
+  if (!orderResult.success) {
+    showNotification('Error loading order details', 'error')
+    return
+  }
+  
+  const order = orderResult.data
+  const subtotal = order.total_amount / (1 + ADMIN_STATE.VAT_RATE)
+  const vat = order.total_amount - subtotal
+  
+  const modal = `
+    <div id="transactionModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onclick="if(event.target.id==='transactionModal') closeModal('transactionModal')">
+      <div class="bg-white rounded-3xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-8 rounded-t-3xl">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-3xl font-bold mb-2">${t('orderDetails') || 'Order Details'}</h2>
+              <p class="text-indigo-100 font-mono text-xl">${order.order_number}</p>
+            </div>
+            <div class="flex gap-3">
+              <button onclick="window.print()" class="bg-white text-indigo-600 px-6 py-3 rounded-xl hover:bg-indigo-50 transition-all font-semibold">
+                <i class="fas fa-print mr-2"></i>${t('print') || 'Print'}
+              </button>
+              <button onclick="closeModal('transactionModal')" class="text-white hover:bg-white/20 p-3 rounded-xl transition-all">
+                <i class="fas fa-times text-2xl"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-8">
+          <!-- Customer & Delivery Info Grid -->
+          <div class="grid md:grid-cols-2 gap-6 mb-8">
+            <!-- Customer Information -->
+            <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 border-2 border-blue-200">
+              <h3 class="text-xl font-bold mb-4 flex items-center text-blue-900">
+                <i class="fas fa-user-circle mr-2"></i>
+                ${t('customerInformation') || 'Customer Information'}
+              </h3>
+              <div class="space-y-3">
+                <div>
+                  <p class="text-sm text-blue-600 font-semibold">${t('name') || 'Name'}</p>
+                  <p class="text-lg font-bold text-blue-900">${order.customer_name || '-'}</p>
+                </div>
+                <div>
+                  <p class="text-sm text-blue-600 font-semibold">${t('email') || 'Email'}</p>
+                  <p class="text-blue-900">${order.customer_email}</p>
+                </div>
+                <div>
+                  <p class="text-sm text-blue-600 font-semibold">${t('phone') || 'Phone'}</p>
+                  <p class="text-blue-900">${order.customer_phone || '-'}</p>
+                </div>
+                <div>
+                  <p class="text-sm text-blue-600 font-semibold">${t('type') || 'Type'}</p>
+                  <span class="px-3 py-1 rounded-full text-xs font-bold bg-blue-500 text-white">
+                    ${order.customer_type || 'individual'}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Delivery Information -->
+            <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-6 border-2 border-green-200">
+              <h3 class="text-xl font-bold mb-4 flex items-center text-green-900">
+                <i class="fas fa-truck mr-2"></i>
+                ${t('deliveryInfo') || 'Delivery Information'}
+              </h3>
+              <div class="space-y-3">
+                <div>
+                  <p class="text-sm text-green-600 font-semibold">${t('address') || 'Address'}</p>
+                  <p class="text-lg font-bold text-green-900">${order.delivery_address || '-'}</p>
+                </div>
+                <div>
+                  <p class="text-sm text-green-600 font-semibold">${t('city') || 'City'}</p>
+                  <p class="text-green-900">${order.delivery_city || '-'}</p>
+                </div>
+                ${order.delivery_notes ? `
+                  <div>
+                    <p class="text-sm text-green-600 font-semibold">${t('notes') || 'Notes'}</p>
+                    <p class="text-green-900">${order.delivery_notes}</p>
+                  </div>
+                ` : ''}
+                <div>
+                  <p class="text-sm text-green-600 font-semibold">${t('orderDate') || 'Order Date'}</p>
+                  <p class="text-green-900">${new Date(order.created_at).toLocaleString()}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Order Items -->
+          <div class="mb-8">
+            <h3 class="text-2xl font-bold mb-6 flex items-center">
+              <i class="fas fa-box-open text-purple-600 mr-3"></i>
+              ${t('orderItems') || 'Order Items'}
+            </h3>
+            <div class="bg-gray-50 rounded-2xl p-6">
+              <div class="overflow-x-auto">
+                <table class="w-full">
+                  <thead class="border-b-2 border-gray-300">
+                    <tr>
+                      <th class="px-4 py-4 text-left text-sm font-bold text-gray-700 uppercase">${t('product') || 'Product'}</th>
+                      <th class="px-4 py-4 text-right text-sm font-bold text-gray-700 uppercase">${t('unitPrice') || 'Unit Price'}</th>
+                      <th class="px-4 py-4 text-right text-sm font-bold text-gray-700 uppercase">${t('quantity') || 'Quantity'}</th>
+                      <th class="px-4 py-4 text-right text-sm font-bold text-gray-700 uppercase">${t('total') || 'Total'}</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-gray-200">
+                    ${order.items && order.items.map(item => `
+                      <tr class="hover:bg-white transition-colors">
+                        <td class="px-4 py-4 font-semibold text-gray-900">${item.product_name_en || item.product_name_ar}</td>
+                        <td class="px-4 py-4 text-right text-gray-700">${item.unit_price.toFixed(2)} ${t('egp') || 'EGP'}</td>
+                        <td class="px-4 py-4 text-right font-semibold text-gray-900">${item.quantity}</td>
+                        <td class="px-4 py-4 text-right font-bold text-green-600 text-lg">${(item.unit_price * item.quantity).toFixed(2)} ${t('egp') || 'EGP'}</td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pricing Breakdown with VAT -->
+          <div class="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl p-8 border-2 border-yellow-200 mb-8">
+            <h3 class="text-2xl font-bold mb-6 flex items-center text-orange-900">
+              <i class="fas fa-calculator mr-3"></i>
+              ${t('pricingBreakdown') || 'Pricing Breakdown'}
+            </h3>
+            <div class="space-y-4">
+              <div class="flex justify-between items-center pb-3 border-b border-orange-200">
+                <span class="text-lg text-gray-700">${t('subtotal') || 'Subtotal'}</span>
+                <span class="text-2xl font-bold text-gray-900">${subtotal.toFixed(2)} ${t('egp') || 'EGP'}</span>
+              </div>
+              <div class="flex justify-between items-center pb-4 border-b-2 border-orange-300">
+                <span class="text-lg text-gray-700">${t('vat') || 'VAT'} (14%)</span>
+                <span class="text-2xl font-bold text-orange-600">${vat.toFixed(2)} ${t('egp') || 'EGP'}</span>
+              </div>
+              <div class="flex justify-between items-center pt-2">
+                <span class="text-2xl font-bold text-gray-900">${t('totalAmount') || 'Total Amount'}</span>
+                <span class="text-4xl font-bold text-green-600">${order.total_amount.toFixed(2)} ${t('egp') || 'EGP'}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Order Status Management -->
+          <div class="mb-6">
+            <h3 class="text-2xl font-bold mb-4 flex items-center">
+              <i class="fas fa-tasks text-blue-600 mr-3"></i>
+              ${t('updateOrderStatus') || 'Update Order Status'}
+            </h3>
+            <div class="flex flex-wrap gap-3">
+              ${['pending', 'confirmed', 'processing', 'delivered'].map(status => `
+                <button 
+                  onclick="updateOrderStatus(${orderId}, '${status}')"
+                  class="px-6 py-3 rounded-xl font-bold transition-all transform hover:scale-105 ${
+                    order.status === status 
+                      ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg' 
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  }"
+                >
+                  <i class="fas ${
+                    status === 'pending' ? 'fa-clock' :
+                    status === 'confirmed' ? 'fa-check' :
+                    status === 'processing' ? 'fa-cog fa-spin' :
+                    'fa-check-circle'
+                  } mr-2"></i>
+                  ${t(status) || status}
+                </button>
+              `).join('')}
+              <button 
+                onclick="updateOrderStatus(${orderId}, 'cancelled')"
+                class="px-6 py-3 rounded-xl font-bold transition-all transform hover:scale-105 ${
+                  order.status === 'cancelled' 
+                    ? 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg' 
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }"
+              >
+                <i class="fas fa-times-circle mr-2"></i>
+                ${t('cancelled') || 'Cancelled'}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `
+  
+  document.body.insertAdjacentHTML('beforeend', modal)
+}
+
+function filterTransactions() {
+  const statusFilter = document.getElementById('statusFilter').value
+  const rows = document.querySelectorAll('.transaction-row')
+  
+  rows.forEach(row => {
+    const status = row.dataset.status
+    const matchesStatus = !statusFilter || status === statusFilter
+    row.style.display = matchesStatus ? '' : 'none'
+  })
+}
+
+async function updateOrderStatus(orderId, newStatus) {
+  const result = await api(`/api/admin/orders/${orderId}/status`, {
+    method: 'PUT',
+    body: JSON.stringify({ status: newStatus })
+  })
+  
+  if (result.success) {
+    showNotification(`Order status updated to ${newStatus}!`, 'success')
+    closeModal('transactionModal')
+    navigateTo('admin-transactions')
+  } else {
+    showNotification(`Error: ${result.error}`, 'error')
+  }
+}
+
+// Export
+if (typeof window !== 'undefined') {
+  window.renderAdminTransactions = renderAdminTransactions
+  window.viewTransactionDetail = viewTransactionDetail
+  window.filterTransactions = filterTransactions
+  window.updateOrderStatus = updateOrderStatus
+}

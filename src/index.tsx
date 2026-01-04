@@ -958,6 +958,7 @@ app.get('/', (c) => {
         </script>
         <script src="/static/app.js"></script>
         <script src="/static/admin-complete.js"></script>
+        <script src="/static/admin-remaining.js"></script>
     </body>
     </html>
   `)
