@@ -604,7 +604,7 @@ app.get('/api/admin/users/:userId', async (c) => {
   const userId = c.req.param('userId')
   
   const user = await DB.prepare(
-    'SELECT id, email, user_type, status, full_name, phone, company_name, commercial_registration, tax_id, responsible_person, created_at, updated_at FROM users WHERE id = ?'
+    'SELECT id, email, user_type, status, full_name, phone, company_name, commercial_registration, tax_id, created_at, updated_at FROM users WHERE id = ?'
   ).bind(userId).first()
   
   if (!user) {
@@ -957,8 +957,7 @@ app.get('/', (c) => {
           });
         </script>
         <script src="/static/app.js"></script>
-        <script src="/static/admin-panel.js"></script>
-        <script src="/static/admin-panel-part2.js"></script>
+        <script src="/static/admin-complete.js"></script>
     </body>
     </html>
   `)
