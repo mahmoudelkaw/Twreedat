@@ -112,7 +112,18 @@ const TRANSLATIONS = {
     bulkPricing: 'أسعار جملة تنافسية',
     fastDelivery: 'توصيل سريع',
     qualityProducts: 'منتجات عالية الجودة',
-    b2bSupport: 'دعم مخصص للشركات'
+    b2bSupport: 'دعم مخصص للشركات',
+    trustedPartners: 'شركاؤنا الموثوقون',
+    partnersDesc: 'نفخر بالعمل مع أفضل العلامات التجارية العالمية',
+    getStarted: 'ابدأ الآن',
+    learnMore: 'اعرف المزيد',
+    ourServices: 'خدماتنا',
+    testimonials: 'آراء العملاء',
+    contactUs: 'اتصل بنا',
+    happyClients: 'عميل سعيد',
+    productsDelivered: 'طلب تم توصيله',
+    yearsExperience: 'سنوات خبرة',
+    customerSatisfaction: 'رضا العملاء'
   },
   en: {
     siteName: 'Twreedat',
@@ -208,7 +219,18 @@ const TRANSLATIONS = {
     bulkPricing: 'Competitive Bulk Pricing',
     fastDelivery: 'Fast Delivery',
     qualityProducts: 'High Quality Products',
-    b2bSupport: 'Dedicated B2B Support'
+    b2bSupport: 'Dedicated B2B Support',
+    trustedPartners: 'Our Trusted Partners',
+    partnersDesc: 'We proudly work with the world\'s best brands',
+    getStarted: 'Get Started',
+    learnMore: 'Learn More',
+    ourServices: 'Our Services',
+    testimonials: 'Testimonials',
+    contactUs: 'Contact Us',
+    happyClients: 'Happy Clients',
+    productsDelivered: 'Orders Delivered',
+    yearsExperience: 'Years Experience',
+    customerSatisfaction: 'Customer Satisfaction'
   }
 }
 
@@ -477,65 +499,292 @@ function renderNavbar() {
 // ==========================================
 
 function renderHome() {
+  const isRTL = APP_STATE.language === 'ar'
+  
   return `
     <div class="min-h-screen">
-      <!-- Hero Section -->
-      <div class="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-20">
-        <div class="container mx-auto px-4 text-center">
-          <h1 class="text-5xl font-bold mb-4">${t('siteName')}</h1>
-          <p class="text-2xl mb-8">${t('b2bPlatform')}</p>
-          <button onclick="navigateTo('products')" class="bg-white text-blue-600 px-8 py-3 rounded-lg text-lg font-semibold hover:bg-blue-50">
-            ${t('browseProducts')} <i class="fas fa-arrow-${APP_STATE.language === 'ar' ? 'left' : 'right'} ml-2"></i>
-          </button>
+      <!-- Hero Section with Gradient Animation -->
+      <div class="relative bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 text-white py-32 overflow-hidden gradient-animate">
+        <!-- Floating Shapes Background -->
+        <div class="absolute inset-0 opacity-10">
+          <div class="absolute top-20 ${isRTL ? 'right-20' : 'left-20'} w-64 h-64 bg-white rounded-full animate-float"></div>
+          <div class="absolute bottom-20 ${isRTL ? 'left-20' : 'right-20'} w-96 h-96 bg-white rounded-full animate-float delay-2"></div>
+        </div>
+        
+        <div class="container mx-auto px-4 relative z-10">
+          <div class="text-center max-w-4xl mx-auto">
+            <div class="animate-fade-in-up">
+              <h1 class="text-6xl md:text-7xl font-bold mb-6 leading-tight">
+                ${t('siteName')}
+              </h1>
+              <p class="text-2xl md:text-3xl mb-8 opacity-90">${t('b2bPlatform')}</p>
+              <p class="text-lg md:text-xl mb-12 opacity-80 max-w-2xl mx-auto">
+                ${APP_STATE.language === 'ar' ? 
+                  'وجهتك الأولى للحصول على أفضل أسعار الجملة في ورق الطباعة، المناديل، ومستلزمات التنظيف' : 
+                  'Your premier destination for the best wholesale prices on copy paper, tissues, and cleaning supplies'}
+              </p>
+              <div class="flex gap-4 justify-center flex-wrap">
+                <button onclick="navigateTo('products')" class="bg-white text-blue-600 px-8 py-4 rounded-lg text-lg font-bold hover:bg-blue-50 hover-lift shadow-elegant-lg">
+                  <i class="fas fa-shopping-bag ${isRTL ? 'ml-2' : 'mr-2'}"></i>
+                  ${t('browseProducts')}
+                </button>
+                <button onclick="navigateTo('register')" class="bg-transparent border-2 border-white text-white px-8 py-4 rounded-lg text-lg font-bold hover:bg-white hover:text-blue-600 transition">
+                  <i class="fas fa-user-plus ${isRTL ? 'ml-2' : 'mr-2'}"></i>
+                  ${t('getStarted')}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Wave Bottom -->
+        <div class="absolute bottom-0 left-0 right-0">
+          <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0 0L60 10C120 20 240 40 360 46.7C480 53 600 47 720 43.3C840 40 960 40 1080 46.7C1200 53 1320 67 1380 73.3L1440 80V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0V0Z" fill="white"/>
+          </svg>
         </div>
       </div>
       
-      <!-- Features Section -->
-      <div class="container mx-auto px-4 py-16">
-        <h2 class="text-3xl font-bold text-center mb-12">${t('whyChooseUs')}</h2>
-        <div class="grid md:grid-cols-4 gap-8">
-          <div class="text-center">
-            <div class="bg-blue-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <i class="fas fa-tags text-4xl text-blue-600"></i>
-            </div>
-            <h3 class="text-xl font-semibold mb-2">${t('bulkPricing')}</h3>
-            <p class="text-gray-600">${t('bulkPricing')}</p>
-          </div>
-          <div class="text-center">
-            <div class="bg-green-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <i class="fas fa-truck text-4xl text-green-600"></i>
-            </div>
-            <h3 class="text-xl font-semibold mb-2">${t('fastDelivery')}</h3>
-            <p class="text-gray-600">${t('fastDelivery')}</p>
-          </div>
-          <div class="text-center">
-            <div class="bg-yellow-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <i class="fas fa-star text-4xl text-yellow-600"></i>
-            </div>
-            <h3 class="text-xl font-semibold mb-2">${t('qualityProducts')}</h3>
-            <p class="text-gray-600">${t('qualityProducts')}</p>
-          </div>
-          <div class="text-center">
-            <div class="bg-purple-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <i class="fas fa-headset text-4xl text-purple-600"></i>
-            </div>
-            <h3 class="text-xl font-semibold mb-2">${t('b2bSupport')}</h3>
-            <p class="text-gray-600">${t('b2bSupport')}</p>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Featured Categories -->
-      <div class="bg-gray-100 py-16">
+      <!-- Stats Section -->
+      <div class="bg-white py-16 -mt-1">
         <div class="container mx-auto px-4">
-          <h2 class="text-3xl font-bold text-center mb-12">${t('categories')}</h2>
-          <div class="grid md:grid-cols-3 gap-8" id="categories-grid">
-            ${APP_STATE.categories.map(cat => `
-              <button onclick="navigateTo('products', { category: ${cat.id} })" class="bg-white p-6 rounded-lg shadow hover:shadow-lg transition text-center">
-                <i class="fas fa-box text-5xl text-blue-600 mb-4"></i>
-                <h3 class="text-xl font-semibold">${APP_STATE.language === 'ar' ? cat.name_ar : cat.name_en}</h3>
+          <div class="grid md:grid-cols-4 gap-8 text-center">
+            <div class="animate-fade-in-up delay-1">
+              <div class="text-5xl font-bold text-blue-600 mb-2">500+</div>
+              <div class="text-gray-600">${t('happyClients')}</div>
+            </div>
+            <div class="animate-fade-in-up delay-2">
+              <div class="text-5xl font-bold text-green-600 mb-2">5000+</div>
+              <div class="text-gray-600">${t('productsDelivered')}</div>
+            </div>
+            <div class="animate-fade-in-up delay-3">
+              <div class="text-5xl font-bold text-purple-600 mb-2">10+</div>
+              <div class="text-gray-600">${t('yearsExperience')}</div>
+            </div>
+            <div class="animate-fade-in-up delay-4">
+              <div class="text-5xl font-bold text-yellow-600 mb-2">98%</div>
+              <div class="text-gray-600">${t('customerSatisfaction')}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Features Section with Icons -->
+      <div class="bg-gray-50 py-20">
+        <div class="container mx-auto px-4">
+          <div class="text-center mb-16">
+            <h2 class="text-4xl md:text-5xl font-bold mb-4">${t('whyChooseUs')}</h2>
+            <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+              ${APP_STATE.language === 'ar' ? 
+                'نقدم أفضل الخدمات والأسعار لشركائنا' : 
+                'We provide the best services and prices for our partners'}
+            </p>
+          </div>
+          
+          <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div class="bg-white p-8 rounded-2xl hover-lift shadow-elegant text-center">
+              <div class="bg-gradient-to-br from-blue-500 to-blue-600 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                <i class="fas fa-tags text-4xl text-white"></i>
+              </div>
+              <h3 class="text-xl font-bold mb-3">${t('bulkPricing')}</h3>
+              <p class="text-gray-600">
+                ${APP_STATE.language === 'ar' ? 
+                  'أسعار تنافسية مع خصومات على الكميات الكبيرة' : 
+                  'Competitive prices with discounts on large quantities'}
+              </p>
+            </div>
+            
+            <div class="bg-white p-8 rounded-2xl hover-lift shadow-elegant text-center">
+              <div class="bg-gradient-to-br from-green-500 to-green-600 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                <i class="fas fa-shipping-fast text-4xl text-white"></i>
+              </div>
+              <h3 class="text-xl font-bold mb-3">${t('fastDelivery')}</h3>
+              <p class="text-gray-600">
+                ${APP_STATE.language === 'ar' ? 
+                  'توصيل سريع إلى جميع أنحاء الدولة' : 
+                  'Fast delivery to all regions'}
+              </p>
+            </div>
+            
+            <div class="bg-white p-8 rounded-2xl hover-lift shadow-elegant text-center">
+              <div class="bg-gradient-to-br from-yellow-500 to-yellow-600 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                <i class="fas fa-award text-4xl text-white"></i>
+              </div>
+              <h3 class="text-xl font-bold mb-3">${t('qualityProducts')}</h3>
+              <p class="text-gray-600">
+                ${APP_STATE.language === 'ar' ? 
+                  'منتجات أصلية من أفضل الماركات العالمية' : 
+                  'Original products from the best global brands'}
+              </p>
+            </div>
+            
+            <div class="bg-white p-8 rounded-2xl hover-lift shadow-elegant text-center">
+              <div class="bg-gradient-to-br from-purple-500 to-purple-600 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                <i class="fas fa-headset text-4xl text-white"></i>
+              </div>
+              <h3 class="text-xl font-bold mb-3">${t('b2bSupport')}</h3>
+              <p class="text-gray-600">
+                ${APP_STATE.language === 'ar' ? 
+                  'فريق دعم متخصص متاح 24/7' : 
+                  'Dedicated support team available 24/7'}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Partnerships Section -->
+      <div class="bg-white py-20">
+        <div class="container mx-auto px-4">
+          <div class="text-center mb-16">
+            <h2 class="text-4xl md:text-5xl font-bold mb-4">${t('trustedPartners')}</h2>
+            <p class="text-xl text-gray-600 max-w-2xl mx-auto">${t('partnersDesc')}</p>
+          </div>
+          
+          <!-- Partner Logos Grid -->
+          <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8 items-center">
+            <!-- Double A -->
+            <div class="partner-logo bg-gray-50 p-6 rounded-xl hover-lift flex items-center justify-center h-32">
+              <div class="text-center">
+                <div class="text-4xl font-bold text-gray-700">Double A</div>
+                <div class="text-xs text-gray-500 mt-1">Premium Paper</div>
+              </div>
+            </div>
+            
+            <!-- PaperOne -->
+            <div class="partner-logo bg-gray-50 p-6 rounded-xl hover-lift flex items-center justify-center h-32">
+              <div class="text-center">
+                <div class="text-4xl font-bold text-gray-700">PaperOne</div>
+                <div class="text-xs text-gray-500 mt-1">Quality Paper</div>
+              </div>
+            </div>
+            
+            <!-- Fine -->
+            <div class="partner-logo bg-gray-50 p-6 rounded-xl hover-lift flex items-center justify-center h-32">
+              <div class="text-center">
+                <div class="text-4xl font-bold text-gray-700">Fine</div>
+                <div class="text-xs text-gray-500 mt-1">Tissues</div>
+              </div>
+            </div>
+            
+            <!-- Fino -->
+            <div class="partner-logo bg-gray-50 p-6 rounded-xl hover-lift flex items-center justify-center h-32">
+              <div class="text-center">
+                <div class="text-4xl font-bold text-gray-700">Fino</div>
+                <div class="text-xs text-gray-500 mt-1">Premium Tissues</div>
+              </div>
+            </div>
+            
+            <!-- CleanPro -->
+            <div class="partner-logo bg-gray-50 p-6 rounded-xl hover-lift flex items-center justify-center h-32">
+              <div class="text-center">
+                <div class="text-4xl font-bold text-gray-700">CleanPro</div>
+                <div class="text-xs text-gray-500 mt-1">Cleaning</div>
+              </div>
+            </div>
+            
+            <!-- Fairy -->
+            <div class="partner-logo bg-gray-50 p-6 rounded-xl hover-lift flex items-center justify-center h-32">
+              <div class="text-center">
+                <div class="text-4xl font-bold text-gray-700">Fairy</div>
+                <div class="text-xs text-gray-500 mt-1">Dish Soap</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Partnership Benefits -->
+          <div class="mt-16 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-8 md:p-12">
+            <div class="grid md:grid-cols-3 gap-8 text-center">
+              <div>
+                <i class="fas fa-handshake text-5xl text-blue-600 mb-4"></i>
+                <h3 class="text-xl font-bold mb-2">
+                  ${APP_STATE.language === 'ar' ? 'شراكات استراتيجية' : 'Strategic Partnerships'}
+                </h3>
+                <p class="text-gray-600">
+                  ${APP_STATE.language === 'ar' ? 
+                    'نعمل مباشرة مع الموزعين المعتمدين' : 
+                    'Working directly with authorized distributors'}
+                </p>
+              </div>
+              <div>
+                <i class="fas fa-certificate text-5xl text-green-600 mb-4"></i>
+                <h3 class="text-xl font-bold mb-2">
+                  ${APP_STATE.language === 'ar' ? 'منتجات أصلية' : 'Original Products'}
+                </h3>
+                <p class="text-gray-600">
+                  ${APP_STATE.language === 'ar' ? 
+                    'ضمان 100% على جميع المنتجات' : 
+                    '100% guarantee on all products'}
+                </p>
+              </div>
+              <div>
+                <i class="fas fa-globe text-5xl text-purple-600 mb-4"></i>
+                <h3 class="text-xl font-bold mb-2">
+                  ${APP_STATE.language === 'ar' ? 'وصول عالمي' : 'Global Reach'}
+                </h3>
+                <p class="text-gray-600">
+                  ${APP_STATE.language === 'ar' ? 
+                    'علامات تجارية عالمية موثوقة' : 
+                    'Trusted global brands'}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Featured Categories with Better Design -->
+      <div class="bg-gradient-to-b from-gray-50 to-white py-20">
+        <div class="container mx-auto px-4">
+          <div class="text-center mb-16">
+            <h2 class="text-4xl md:text-5xl font-bold mb-4">${t('categories')}</h2>
+            <p class="text-xl text-gray-600">
+              ${APP_STATE.language === 'ar' ? 
+                'تصفح منتجاتنا حسب الفئة' : 
+                'Browse our products by category'}
+            </p>
+          </div>
+          
+          <div class="grid md:grid-cols-3 gap-8">
+            ${APP_STATE.categories.map((cat, index) => `
+              <button onclick="navigateTo('products', { category: ${cat.id} })" class="group bg-white p-8 rounded-2xl hover-lift shadow-elegant text-center animate-fade-in-up delay-${index + 1}">
+                <div class="bg-gradient-to-br from-blue-500 to-purple-600 w-24 h-24 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform shadow-lg">
+                  <i class="fas fa-box text-5xl text-white"></i>
+                </div>
+                <h3 class="text-2xl font-bold mb-3">${APP_STATE.language === 'ar' ? cat.name_ar : cat.name_en}</h3>
+                <p class="text-gray-600 mb-4">${APP_STATE.language === 'ar' ? cat.description_ar : cat.description_en}</p>
+                <span class="text-blue-600 font-semibold group-hover:underline">
+                  ${APP_STATE.language === 'ar' ? 'تصفح المنتجات' : 'Browse Products'}
+                  <i class="fas fa-arrow-${isRTL ? 'left' : 'right'} ${isRTL ? 'mr-2' : 'ml-2'}"></i>
+                </span>
               </button>
             `).join('')}
+          </div>
+        </div>
+      </div>
+      
+      <!-- CTA Section -->
+      <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-20">
+        <div class="container mx-auto px-4 text-center">
+          <h2 class="text-4xl md:text-5xl font-bold mb-6">
+            ${APP_STATE.language === 'ar' ? 
+              'جاهز لبدء التوفير على طلباتك؟' : 
+              'Ready to Start Saving on Your Orders?'}
+          </h2>
+          <p class="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
+            ${APP_STATE.language === 'ar' ? 
+              'انضم إلى مئات الشركات التي توفر آلاف الجنيهات شهرياً' : 
+              'Join hundreds of companies saving thousands every month'}
+          </p>
+          <div class="flex gap-4 justify-center flex-wrap">
+            <button onclick="navigateTo('register')" class="bg-white text-blue-600 px-8 py-4 rounded-lg text-lg font-bold hover:bg-blue-50 hover-lift shadow-elegant-lg">
+              <i class="fas fa-rocket ${isRTL ? 'ml-2' : 'mr-2'}"></i>
+              ${t('getStarted')}
+            </button>
+            <button onclick="navigateTo('products')" class="bg-transparent border-2 border-white text-white px-8 py-4 rounded-lg text-lg font-bold hover:bg-white hover:text-blue-600 transition">
+              <i class="fas fa-eye ${isRTL ? 'ml-2' : 'mr-2'}"></i>
+              ${t('browseProducts')}
+            </button>
           </div>
         </div>
       </div>
