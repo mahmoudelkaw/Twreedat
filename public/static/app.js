@@ -123,7 +123,8 @@ const TRANSLATIONS = {
     happyClients: 'عميل سعيد',
     productsDelivered: 'طلب تم توصيله',
     yearsExperience: 'سنوات خبرة',
-    customerSatisfaction: 'رضا العملاء'
+    customerSatisfaction: 'رضا العملاء',
+    updated: 'تم التحديث'
   },
   en: {
     siteName: 'Twreedat',
@@ -230,7 +231,8 @@ const TRANSLATIONS = {
     happyClients: 'Happy Clients',
     productsDelivered: 'Orders Delivered',
     yearsExperience: 'Years Experience',
-    customerSatisfaction: 'Customer Satisfaction'
+    customerSatisfaction: 'Customer Satisfaction',
+    updated: 'Updated'
   }
 }
 
@@ -1473,6 +1475,274 @@ async function renderAdmin() {
 }
 
 // ==========================================
+// PAGE: ADMIN ORDERS
+// ==========================================
+
+async function renderAdminOrders() {
+  if (!APP_STATE.user || APP_STATE.user.user_type !== 'admin') {
+    return `<div class="text-center py-16">Access Denied</div>`
+  }
+  
+  const result = await api('/admin/orders')
+  const orders = result.success ? result.data : []
+  
+  return `
+    <div class="container mx-auto px-4 py-8">
+      <div class="flex items-center justify-between mb-8">
+        <h1 class="text-3xl font-bold">${t('orders')} ${t('adminPanel')}</h1>
+        <button onclick="navigateTo('admin')" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+          <i class="fas fa-arrow-left mr-2"></i> ${t('dashboard')}
+        </button>
+      </div>
+      
+      <!-- Filters -->
+      <div class="mb-6 flex gap-4">
+        <select id="status-filter" class="border rounded px-4 py-2" onchange="filterOrders(this.value)">
+          <option value="">${t('status')}: All</option>
+          <option value="pending">${t('pending')}</option>
+          <option value="confirmed">${t('confirmed')}</option>
+          <option value="processing">${t('processing')}</option>
+          <option value="delivered">${t('delivered')}</option>
+          <option value="cancelled">${t('cancelled')}</option>
+        </select>
+      </div>
+      
+      <!-- Orders Table -->
+      <div class="bg-white rounded-lg shadow overflow-x-auto">
+        <table class="w-full">
+          <thead class="bg-gray-50 border-b">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">${t('orderNumber')}</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">${t('fullName')}</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">${t('orderDate')}</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">${t('total')}</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">${t('status')}</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">${t('actions')}</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y">
+            ${orders.length === 0 ? `
+              <tr>
+                <td colspan="6" class="px-6 py-8 text-center text-gray-500">
+                  <i class="fas fa-inbox text-4xl mb-2"></i>
+                  <p>${t('noOrders')}</p>
+                </td>
+              </tr>
+            ` : orders.map(order => `
+              <tr class="hover:bg-gray-50">
+                <td class="px-6 py-4 font-medium">${order.order_number}</td>
+                <td class="px-6 py-4">${order.full_name}</td>
+                <td class="px-6 py-4">${new Date(order.created_at).toLocaleDateString()}</td>
+                <td class="px-6 py-4 font-bold">${order.final_amount.toFixed(2)} ${t('egp')}</td>
+                <td class="px-6 py-4">
+                  <span class="px-3 py-1 rounded-full text-sm font-semibold ${
+                    order.status === 'delivered' ? 'bg-green-100 text-green-800' :
+                    order.status === 'processing' ? 'bg-blue-100 text-blue-800' :
+                    order.status === 'confirmed' ? 'bg-yellow-100 text-yellow-800' :
+                    order.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                    'bg-gray-100 text-gray-800'
+                  }">
+                    ${t(order.status)}
+                  </span>
+                </td>
+                <td class="px-6 py-4">
+                  <select onchange="updateOrderStatus(${order.id}, this.value)" class="border rounded px-2 py-1 text-sm">
+                    <option value="">${t('actions')}</option>
+                    <option value="pending">→ ${t('pending')}</option>
+                    <option value="confirmed">→ ${t('confirmed')}</option>
+                    <option value="processing">→ ${t('processing')}</option>
+                    <option value="delivered">→ ${t('delivered')}</option>
+                    <option value="cancelled">→ ${t('cancelled')}</option>
+                  </select>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `
+}
+
+async function updateOrderStatus(orderId, newStatus) {
+  if (!newStatus) return
+  
+  try {
+    const result = await api(`/admin/orders/${orderId}/status`, {
+      method: 'PATCH',
+      data: { status: newStatus }
+    })
+    
+    if (result.success) {
+      alert(`${t('orderStatus')} ${t('updated')}!`)
+      navigateTo('admin-orders')
+    }
+  } catch (error) {
+    alert(error.message)
+  }
+}
+
+// ==========================================
+// PAGE: ADMIN USERS
+// ==========================================
+
+async function renderAdminUsers() {
+  if (!APP_STATE.user || APP_STATE.user.user_type !== 'admin') {
+    return `<div class="text-center py-16">Access Denied</div>`
+  }
+  
+  const result = await api('/admin/users')
+  const users = result.success ? result.data : []
+  
+  return `
+    <div class="container mx-auto px-4 py-8">
+      <div class="flex items-center justify-between mb-8">
+        <h1 class="text-3xl font-bold">${t('users')} ${t('adminPanel')}</h1>
+        <button onclick="navigateTo('admin')" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+          <i class="fas fa-arrow-left mr-2"></i> ${t('dashboard')}
+        </button>
+      </div>
+      
+      <!-- Filters -->
+      <div class="mb-6 flex gap-4">
+        <select id="type-filter" class="border rounded px-4 py-2" onchange="filterUsers(this.value)">
+          <option value="">${t('userType')}: All</option>
+          <option value="company">${t('company')}</option>
+          <option value="individual">${t('individual')}</option>
+        </select>
+        <select id="status-filter-users" class="border rounded px-4 py-2" onchange="filterUsersByStatus(this.value)">
+          <option value="">${t('status')}: All</option>
+          <option value="pending">${t('pending')}</option>
+          <option value="active">${t('active')}</option>
+          <option value="suspended">${t('suspend')}</option>
+        </select>
+      </div>
+      
+      <!-- Users Table -->
+      <div class="bg-white rounded-lg shadow overflow-x-auto">
+        <table class="w-full">
+          <thead class="bg-gray-50 border-b">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">${t('fullName')}</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">${t('email')}</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">${t('userType')}</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">${t('companyName')}</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">${t('status')}</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">${t('actions')}</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y">
+            ${users.length === 0 ? `
+              <tr>
+                <td colspan="6" class="px-6 py-8 text-center text-gray-500">
+                  <i class="fas fa-users text-4xl mb-2"></i>
+                  <p>No users found</p>
+                </td>
+              </tr>
+            ` : users.map(user => `
+              <tr class="hover:bg-gray-50">
+                <td class="px-6 py-4 font-medium">${user.full_name}</td>
+                <td class="px-6 py-4">${user.email}</td>
+                <td class="px-6 py-4">
+                  <span class="px-3 py-1 rounded-full text-xs font-semibold ${
+                    user.user_type === 'company' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                  }">
+                    ${t(user.user_type)}
+                  </span>
+                </td>
+                <td class="px-6 py-4">${user.company_name || '-'}</td>
+                <td class="px-6 py-4">
+                  <span class="px-3 py-1 rounded-full text-sm font-semibold ${
+                    user.status === 'active' ? 'bg-green-100 text-green-800' :
+                    user.status === 'suspended' ? 'bg-red-100 text-red-800' :
+                    'bg-yellow-100 text-yellow-800'
+                  }">
+                    ${t(user.status)}
+                  </span>
+                </td>
+                <td class="px-6 py-4">
+                  <select onchange="updateUserStatus(${user.id}, this.value)" class="border rounded px-2 py-1 text-sm">
+                    <option value="">${t('actions')}</option>
+                    <option value="active">${t('approve')}</option>
+                    <option value="suspended">${t('suspend')}</option>
+                    <option value="pending">Set Pending</option>
+                  </select>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `
+}
+
+async function updateUserStatus(userId, newStatus) {
+  if (!newStatus) return
+  
+  try {
+    const result = await api(`/admin/users/${userId}/status`, {
+      method: 'PATCH',
+      data: { status: newStatus }
+    })
+    
+    if (result.success) {
+      alert(`User status updated!`)
+      navigateTo('admin-users')
+    }
+  } catch (error) {
+    alert(error.message)
+  }
+}
+
+// ==========================================
+// PAGE: ADMIN PRODUCTS
+// ==========================================
+
+function renderAdminProducts() {
+  if (!APP_STATE.user || APP_STATE.user.user_type !== 'admin') {
+    return `<div class="text-center py-16">Access Denied</div>`
+  }
+  
+  return `
+    <div class="container mx-auto px-4 py-8">
+      <div class="flex items-center justify-between mb-8">
+        <h1 class="text-3xl font-bold">${t('products')} ${t('adminPanel')}</h1>
+        <button onclick="navigateTo('admin')" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+          <i class="fas fa-arrow-left mr-2"></i> ${t('dashboard')}
+        </button>
+      </div>
+      
+      <div class="bg-white rounded-lg shadow p-12 text-center">
+        <i class="fas fa-tools text-6xl text-gray-300 mb-6"></i>
+        <h2 class="text-2xl font-bold mb-4">
+          ${APP_STATE.language === 'ar' ? 'إدارة المنتجات' : 'Product Management'}
+        </h2>
+        <p class="text-gray-600 mb-6">
+          ${APP_STATE.language === 'ar' ? 
+            'ميزة إدارة المنتجات قيد التطوير. حالياً يمكنك إدارة المنتجات من خلال قاعدة البيانات.' : 
+            'Product management feature is under development. Currently, you can manage products through the database.'}
+        </p>
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 text-left max-w-2xl mx-auto">
+          <h3 class="font-bold mb-3">
+            ${APP_STATE.language === 'ar' ? 'المنتجات الحالية:' : 'Current Products:'}
+          </h3>
+          <ul class="space-y-2 text-sm">
+            <li>✅ 7 ${APP_STATE.language === 'ar' ? 'منتجات نشطة' : 'active products'}</li>
+            <li>✅ 3 ${APP_STATE.language === 'ar' ? 'فئات' : 'categories'}</li>
+            <li>✅ 28 ${APP_STATE.language === 'ar' ? 'مستوى تسعير' : 'pricing tiers'}</li>
+          </ul>
+        </div>
+        <button onclick="navigateTo('products')" class="mt-6 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700">
+          <i class="fas fa-eye mr-2"></i>
+          ${APP_STATE.language === 'ar' ? 'عرض المنتجات' : 'View Products'}
+        </button>
+      </div>
+    </div>
+  `
+}
+
+// ==========================================
 // SEARCH & FILTER HANDLERS
 // ==========================================
 
@@ -1526,6 +1796,15 @@ async function render() {
       break
     case 'admin':
       content = await renderAdmin()
+      break
+    case 'admin-orders':
+      content = await renderAdminOrders()
+      break
+    case 'admin-users':
+      content = await renderAdminUsers()
+      break
+    case 'admin-products':
+      content = renderAdminProducts()
       break
     default:
       content = renderHome()
