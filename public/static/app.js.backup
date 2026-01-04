@@ -763,8 +763,7 @@ async function updatePriceCalculation() {
       document.getElementById('calc-total').textContent = `${data.subtotal.toFixed(2)} ${t('egp')}`
       
       const discountAmount = (data.subtotal * data.discount / 100)
-      const egpText = t('egp')
-      document.getElementById('calc-discount').textContent = data.discount > 0 ? `${discountAmount.toFixed(2)} ${egpText} (${data.discount}%)` : `0 ${egpText}`
+      document.getElementById('calc-discount').textContent = data.discount > 0 ? `${discountAmount.toFixed(2)} ${t('egp')} (${data.discount}%)` : '0 ${t('egp')}'
       document.getElementById('calc-final').textContent = `${(data.subtotal - discountAmount).toFixed(2)} ${t('egp')}`
     }
   } catch (error) {
