@@ -610,18 +610,99 @@ app.get('/', (c) => {
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Twreedat | توريدات - B2B Wholesale Platform</title>
+        
+        <!-- SEO Meta Tags -->
+        <title>Twreedat | توريدات - منصة الجملة للشركات | B2B Wholesale Platform</title>
+        <meta name="description" content="منصة توريدات للبيع بالجملة. ورق طباعة، مناديل، ومستلزمات تنظيف بأسعار الجملة للشركات والمؤسسات. Twreedat B2B wholesale platform for copy paper, tissues, and cleaning supplies.">
+        <meta name="keywords" content="توريدات, جملة, ورق طباعة, مناديل, تنظيف, wholesale, B2B, bulk, copy paper, tissues">
+        <meta name="author" content="Twreedat">
+        <meta name="robots" content="index, follow">
+        
+        <!-- Open Graph / Facebook -->
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="https://twreedat.pages.dev/">
+        <meta property="og:title" content="Twreedat | توريدات - B2B Wholesale Platform">
+        <meta property="og:description" content="منصة الجملة للشركات والمؤسسات - ورق طباعة، مناديل، مستلزمات تنظيف">
+        
+        <!-- Twitter -->
+        <meta property="twitter:card" content="summary_large_image">
+        <meta property="twitter:title" content="Twreedat | توريدات">
+        <meta property="twitter:description" content="منصة الجملة للشركات والمؤسسات">
+        
+        <!-- Favicon -->
+        <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📦</text></svg>">
+        
+        <!-- Stylesheets -->
         <script src="https://cdn.tailwindcss.com"></script>
         <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+        
         <style>
+          /* Font Families */
           [dir="rtl"] { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
           [dir="ltr"] { font-family: Arial, Helvetica, sans-serif; }
+          
+          /* Loading Spinner */
+          .loader {
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #2563eb;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+          }
+          
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+          
+          /* Smooth transitions */
+          * {
+            transition: color 0.2s ease, background-color 0.2s ease;
+          }
+          
+          /* Hide scrollbar for cleaner look but keep functionality */
+          ::-webkit-scrollbar {
+            width: 8px;
+          }
+          
+          ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+          }
+          
+          ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+          }
+          
+          ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+          }
         </style>
     </head>
     <body class="bg-gray-50">
+        <!-- Loading Screen -->
+        <div id="loading-screen" class="fixed inset-0 bg-white z-50 flex items-center justify-center">
+            <div class="text-center">
+                <div class="loader mx-auto mb-4"></div>
+                <h2 class="text-2xl font-bold text-blue-600 mb-2">توريدات | Twreedat</h2>
+                <p class="text-gray-600">Loading...</p>
+            </div>
+        </div>
+        
+        <!-- Main App Container -->
         <div id="app"></div>
         
+        <!-- Scripts -->
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
+        <script>
+          // Hide loading screen when page is ready
+          window.addEventListener('load', function() {
+            setTimeout(function() {
+              document.getElementById('loading-screen').style.display = 'none';
+            }, 500);
+          });
+        </script>
         <script src="/static/app.js"></script>
     </body>
     </html>
