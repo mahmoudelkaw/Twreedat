@@ -288,6 +288,7 @@ async function renderAdminOverview() {
 // Export functions
 if (typeof window !== 'undefined') {
   window.renderAdminOverview = renderAdminOverview
+  window.renderAdminLayout = renderAdminLayout
   window.ADMIN_STATE = ADMIN_STATE
   window.showNotification = showNotification
   window.closeModal = closeModal
