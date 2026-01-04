@@ -176,7 +176,7 @@ CREATE INDEX IF NOT EXISTS idx_cart_user ON cart_items(user_id);
 
 -- Insert default admin user (password: admin123 - CHANGE THIS!)
 INSERT INTO users (email, password_hash, user_type, status, full_name, phone) 
-VALUES ('admin@twreedat.com', '$2a$10$rqZxYxJKZxYxJKZxYxJKZO', 'admin', 'active', 'Admin User', '+20100000000');
+VALUES ('admin@twreedat.com', '$2a$10$admin123', 'admin', 'active', 'Admin User', '+20100000000');
 
 -- Insert default site settings
 INSERT INTO site_settings (key, value_en, value_ar) VALUES

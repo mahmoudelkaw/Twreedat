@@ -66,8 +66,8 @@ INSERT INTO price_tiers (product_id, min_quantity, max_quantity, price_per_unit,
 
 -- Sample Company User (for testing B2B features)
 INSERT INTO users (email, password_hash, user_type, status, full_name, phone, company_name, commercial_registration, tax_id) 
-VALUES ('company@test.com', '$2a$10$rqZxYxJKZxYxJKZxYxJKZO', 'company', 'active', 'Ahmed Hassan', '+201001234567', 'Cairo Trading Co.', 'CR-123456789', 'TAX-987654321');
+VALUES ('company@test.com', '$2a$10$admin123', 'company', 'active', 'Ahmed Hassan', '+201001234567', 'Cairo Trading Co.', 'CR-123456789', 'TAX-987654321');
 
 -- Sample Individual User
 INSERT INTO users (email, password_hash, user_type, status, full_name, phone) 
-VALUES ('individual@test.com', '$2a$10$rqZxYxJKZxYxJKZxYxJKZO', 'individual', 'active', 'Mohamed Ali', '+201009876543');
+VALUES ('individual@test.com', '$2a$10$admin123', 'individual', 'active', 'Mohamed Ali', '+201009876543');
