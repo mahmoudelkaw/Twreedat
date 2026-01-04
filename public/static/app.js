@@ -488,6 +488,7 @@ async function loadProduct(id) {
 // ==========================================
 
 function navigateTo(page, params = {}) {
+  console.log('[DEBUG] Navigating to:', page)
   APP_STATE.currentPage = page
   APP_STATE.pageParams = params
   render()
@@ -1847,6 +1848,9 @@ async function render() {
   
   let content = ''
   
+  console.log('[DEBUG] Rendering page:', APP_STATE.currentPage)
+  console.log('[DEBUG] renderAdminOverview exists:', typeof window.renderAdminOverview)
+  
   switch (APP_STATE.currentPage) {
     case 'home':
       content = renderHome()
@@ -1874,7 +1878,18 @@ async function render() {
       break
     case 'admin':
     case 'admin-overview':
-      content = await renderAdminOverview()
+      console.log('[DEBUG] About to call renderAdminOverview')
+      try {
+        content = await renderAdminOverview()
+        console.log('[DEBUG] renderAdminOverview returned content length:', content?.length)
+      } catch (error) {
+        console.error('[ERROR] renderAdminOverview failed:', error)
+        content = `<div class="container mx-auto px-4 py-16 text-center">
+          <h1 class="text-3xl font-bold text-red-600 mb-4">Error Loading Admin Panel</h1>
+          <p class="text-gray-700">${error.message}</p>
+          <button onclick="navigateTo('home')" class="mt-4 bg-blue-600 text-white px-6 py-3 rounded-lg">Go Home</button>
+        </div>`
+      }
       break
     case 'admin-orders':
     case 'admin-transactions':
@@ -1884,13 +1899,13 @@ async function render() {
       content = await renderAdminUsers()
       break
     case 'admin-products':
-      content = renderAdminProducts()
+      content = await renderAdminProducts()
       break
     case 'admin-admins':
-      content = renderAdminAdmins()
+      content = await renderAdminAdmins()
       break
     case 'admin-terms':
-      content = renderAdminTerms()
+      content = await renderAdminTerms()
       break
     default:
       content = renderHome()
