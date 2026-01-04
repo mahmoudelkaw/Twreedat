@@ -598,6 +598,120 @@ app.get('/api/admin/analytics', async (c) => {
   })
 })
 
+// Get user details
+app.get('/api/admin/users/:userId', async (c) => {
+  const { DB } = c.env
+  const userId = c.req.param('userId')
+  
+  const user = await DB.prepare(
+    'SELECT id, email, user_type, status, full_name, phone, company_name, commercial_registration, tax_id, responsible_person, created_at, updated_at FROM users WHERE id = ?'
+  ).bind(userId).first()
+  
+  if (!user) {
+    return c.json({ success: false, error: 'User not found' }, 404)
+  }
+  
+  return c.json({ success: true, data: user })
+})
+
+// Get user's orders
+app.get('/api/admin/users/:userId/orders', async (c) => {
+  const { DB } = c.env
+  const userId = c.req.param('userId')
+  
+  const orders = await DB.prepare(
+    'SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC'
+  ).bind(userId).all()
+  
+  return c.json({ success: true, data: orders.results })
+})
+
+// Get order details with items
+app.get('/api/admin/orders/:orderId', async (c) => {
+  const { DB } = c.env
+  const orderId = c.req.param('orderId')
+  
+  const order = await DB.prepare(`
+    SELECT 
+      o.*,
+      u.full_name as customer_name,
+      u.email as customer_email,
+      u.phone as customer_phone,
+      u.user_type as customer_type
+    FROM orders o
+    JOIN users u ON o.user_id = u.id
+    WHERE o.id = ?
+  `).bind(orderId).first()
+  
+  if (!order) {
+    return c.json({ success: false, error: 'Order not found' }, 404)
+  }
+  
+  const items = await DB.prepare(
+    'SELECT * FROM order_items WHERE order_id = ?'
+  ).bind(orderId).all()
+  
+  return c.json({
+    success: true,
+    data: {
+      ...order,
+      items: items.results
+    }
+  })
+})
+
+// Update order status
+app.put('/api/admin/orders/:orderId/status', async (c) => {
+  const { DB } = c.env
+  const orderId = c.req.param('orderId')
+  const { status } = await c.req.json()
+  
+  const validStatuses = ['pending', 'confirmed', 'processing', 'delivered', 'cancelled']
+  if (!validStatuses.includes(status)) {
+    return c.json({ success: false, error: 'Invalid status' }, 400)
+  }
+  
+  await DB.prepare(
+    'UPDATE orders SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?'
+  ).bind(status, orderId).run()
+  
+  return c.json({ success: true, message: 'Order status updated' })
+})
+
+// User management actions
+app.put('/api/admin/users/:userId/approve', async (c) => {
+  const { DB } = c.env
+  const userId = c.req.param('userId')
+  
+  await DB.prepare(
+    'UPDATE users SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?'
+  ).bind('active', userId).run()
+  
+  return c.json({ success: true, message: 'User approved' })
+})
+
+app.put('/api/admin/users/:userId/suspend', async (c) => {
+  const { DB } = c.env
+  const userId = c.req.param('userId')
+  
+  await DB.prepare(
+    'UPDATE users SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?'
+  ).bind('suspended', userId).run()
+  
+  return c.json({ success: true, message: 'User suspended' })
+})
+
+app.put('/api/admin/users/:userId/activate', async (c) => {
+  const { DB } = c.env
+  const userId = c.req.param('userId')
+  
+  await DB.prepare(
+    'UPDATE users SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?'
+  ).bind('active', userId).run()
+  
+  return c.json({ success: true, message: 'User activated' })
+})
+
 // ==========================================
 // FRONTEND ROUTES
 // ==========================================
@@ -843,6 +957,8 @@ app.get('/', (c) => {
           });
         </script>
         <script src="/static/app.js"></script>
+        <script src="/static/admin-panel.js"></script>
+        <script src="/static/admin-panel-part2.js"></script>
     </body>
     </html>
   `)

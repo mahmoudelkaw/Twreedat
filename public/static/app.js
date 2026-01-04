@@ -1873,16 +1873,24 @@ async function render() {
       content = await renderOrders()
       break
     case 'admin':
-      content = await renderAdmin()
+    case 'admin-overview':
+      content = await renderAdminOverview()
       break
     case 'admin-orders':
-      content = await renderAdminOrders()
+    case 'admin-transactions':
+      content = await renderAdminTransactions()
       break
     case 'admin-users':
       content = await renderAdminUsers()
       break
     case 'admin-products':
       content = renderAdminProducts()
+      break
+    case 'admin-admins':
+      content = renderAdminAdmins()
+      break
+    case 'admin-terms':
+      content = renderAdminTerms()
       break
     default:
       content = renderHome()
